@@ -1,5 +1,6 @@
 import argparse
 import random
+import datetime
 
 import torch
 import torch.nn as nn
@@ -9,6 +10,13 @@ import numpy as np
 
 from dataset import trafficDataLoader
 from model import GRNN
+
+
+def getTime(begin, end):
+    timeDelta = end - begin
+    return '%d h %d m %d.%ds' % (timeDelta.seconds // 3600, (timeDelta.seconds%3600) // 60, timeDelta.seconds % 60, timeDelta.microseconds)
+
+timStart = datetime.datetime.now()
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--taskID', type=int, default=1, help='traffic prediction task id')
@@ -68,12 +76,16 @@ def main(opt):
         y = data[:, (t + 1):(t + opt.truncate + 1), :, :]
 
         for _ in range(opt.nIter):
+            timStamp = datetime.datetime.now()
             prediction, hNew = net(x, hState, A)
+            print('Forward used: %s.' % getTime(timStamp, datetime.datetime.now()))
             hState = hState.data
 
             loss = criterion(prediction, y)
             optimizer.zero_grad()
+            timStamp = datetime.datetime.now()
             loss.backward()
+            print('Backward used: %s.' % getTime(timStamp, datetime.datetime.now()))
             optimizer.step()
         
         hState = hNew.data
@@ -85,6 +97,7 @@ def main(opt):
             plt.plot([t + opt.truncate - 2, t + opt.truncate - 1], x[:, -2:, 0, :].data.numpy().flatten(), 'r-')
             plt.plot([t + opt.truncate - 1, t + opt.truncate], [yLastPred, prediction[0, -1, 0, 0]], 'b-')
         plt.draw()
+        plt.pause(0.5)
         yLastPred = prediction[0, -1, 0, 0]
 
     plt.ioff()

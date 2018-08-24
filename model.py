@@ -72,7 +72,7 @@ class Propogator(nn.Module):
         S = torch.bmm(hState, A)
 
         for n in range(self.nNode):
-            O[:, n, :], H[:, :, n] = self.gruCell[n](x[:, n, :], S[:, :, n])
+            O[:, n, :], H[:, :, n] = self.cells[n](x[:, n, :], S[:, :, n])
 
         hState = H
 
@@ -99,7 +99,7 @@ class GRNN(nn.Module):
         O = torch.zeros(self.batchSize, self.interval, self.nNode, self.dimFeature).double()
 
         for t in range(self.interval):
-            O[:, t, :, :], h = self.propogator(x, hState, A)
+            O[:, t, :, :], h = self.propogator(x[:, t, :, :], hState, A)
             hState = h
 
         return O, hState
