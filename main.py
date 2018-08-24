@@ -49,6 +49,13 @@ def main(opt):
     opt.nNode = dataLoader.nNode
     opt.dimFeature = 1
 
+    #--------TEST---------
+    data = data[:, 0]
+    data = data[:, np.newaxis]
+    A = np.array([1])
+    A = data[:,  np.newaxis]
+    #------TEST END-------
+
     data = torch.from_numpy(data[np.newaxis, :, :, np.newaxis]) # [b, T, n, d]
     A = torch.from_numpy(A[np.newaxis, :, :])                   # [n, n, n]
 
