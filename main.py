@@ -47,21 +47,23 @@ def main(opt):
     data = np.transpose(dataLoader.data)        # [T, n]
     A = dataLoader.A
     opt.nNode = dataLoader.nNode
+    A = A + np.eye(opt.nNode)
     opt.dimFeature = 1
 
     #--------TEST---------
-    data = data[:, 0]
-    data = data[:, np.newaxis]
-    A = np.array([1])
-    A = data[:,  np.newaxis]
+    #data = data[:, 0]
+    #data = data[:, np.newaxis]
+    #A = np.array([1.])
+    #A = A[:, np.newaxis]
+    #opt.nNode = 1
     #------TEST END-------
 
     data = torch.from_numpy(data[np.newaxis, :, :, np.newaxis]) # [b, T, n, d]
-    A = torch.from_numpy(A[np.newaxis, :, :])                   # [n, n, n]
+    A = torch.from_numpy(A[np.newaxis, :, :])                   # [b, n, n]
 
     net = GRNN(opt)
     net.double()
-    # print(net)
+    print(net)
 
     criterion = nn.MSELoss()
 
@@ -78,24 +80,27 @@ def main(opt):
 
     hState = torch.randn(opt.batchSize, opt.dimHidden, opt.nNode).double()
     yLastPred = 0
-    for t in range(data.size(2) - opt.truncate):
+    
+    for t in range(data.size(1) - opt.truncate):
         x = data[:, t:(t + opt.truncate), :, :]
         y = data[:, (t + 1):(t + opt.truncate + 1), :, :]
 
-        for _ in range(opt.nIter):
+        for i in range(opt.nIter):
+            process = '[Log] %d propogation, %d epoch. ' % (t + 1, i + 1)
             timStamp = datetime.datetime.now()
             prediction, hNew = net(x, hState, A)
-            print('Forward used: %s.' % getTime(timStamp, datetime.datetime.now()))
+            print(process + 'Forward used: %s.' % getTime(timStamp, datetime.datetime.now()))
             hState = hState.data
 
             loss = criterion(prediction, y)
             optimizer.zero_grad()
             timStamp = datetime.datetime.now()
             loss.backward()
-            print('Backward used: %s.' % getTime(timStamp, datetime.datetime.now()))
+            print(process + 'Backward used: %s.' % getTime(timStamp, datetime.datetime.now()))
             optimizer.step()
         
-        hState = hNew.data
+        _, hState = net.propogator(x[:, 0, :, :], hState, A)
+        hState = hState.data
 
         if t == 0:
             plt.plot([v for v in range(opt.truncate)], x[:, :, 0, :].data.numpy().flatten(), 'r-')
