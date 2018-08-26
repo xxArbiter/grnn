@@ -3,7 +3,9 @@ import torch
 import os
 import scipy.io as spio
 
-def getTime(begin, end=datetime.datetime.now()):
+def getTime(begin, end=None):
+    if end is None:
+        end = datetime.datetime.now()
     timeDelta = end - begin
     return '%d h %d m %d.%ds' % (timeDelta.seconds // 3600, (timeDelta.seconds%3600) // 60, timeDelta.seconds % 60, timeDelta.microseconds)
 
@@ -15,10 +17,10 @@ class Log(object):
         self.taskID = opt.taskID
 
     def showIterState(self, t, start):
-        print('[Log] %d iteration. MSELoss: %.4f, Train used: %s.' % (t + 1, self.mseLoss[t], getTime(start)))
+        if t % 10 == 0:
+            print('[Log] %d iteration. MSELoss: %.4f, Train used: %s.' % (t + 1, self.mseLoss[t], getTime(start)))
 
     def saveResult(self):
         if not os.path.exists('result'):
             os.mkdir('result')
-            
         spio.savemat('result/result_%d.mat' % self.taskID, {'prediction': self.prediction, 'mseLoss': self.mseLoss})
