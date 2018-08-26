@@ -15,12 +15,15 @@ class Log(object):
         self.prediction = torch.zeros(opt.batchSize, opt.interval - opt.truncate, opt.nNode, opt.dimFeature)
         self.mseLoss = torch.zeros(opt.interval - opt.truncate)
         self.taskID = opt.taskID
+        self.interval = opt.interval
 
     def showIterState(self, t, start):
         if t % 10 == 0:
             print('[Log] %d iteration. MSELoss: %.4f, Train used: %s.' % (t + 1, self.mseLoss[t], getTime(start)))
 
-    def saveResult(self):
+    def saveResult(self, t):
         if not os.path.exists('result'):
             os.mkdir('result')
-        spio.savemat('result/result_%d.mat' % self.taskID, {'prediction': self.prediction, 'mseLoss': self.mseLoss})
+        if t % 100 == 0 and t != 0:
+            print('[Log] Results saved.')
+            spio.savemat('result/result_%d.mat' % self.taskID, {'prediction': self.prediction, 'mseLoss': self.mseLoss, 'iter': t})

@@ -116,11 +116,11 @@ def main(opt):
             plt.pause(0.5)
             yLastPred = O[0, -1, opt.showNum, 0]
 
+        log.saveResult(t)
+
     if opt.showNum != None:
         plt.ioff()
         plt.show()
-
-    log.saveResult()
 
 if __name__ == "__main__":
     main(opt)
