@@ -18,12 +18,12 @@ class Log(object):
         self.interval = opt.interval
 
     def showIterState(self, t, start):
-        if t % 10 == 0:
+        if (t + 1) % 10 == 0:
             print('[Log] %d iteration. MSELoss: %.4f, Train used: %s.' % (t + 1, self.mseLoss[t], getTime(start)))
 
     def saveResult(self, t):
         if not os.path.exists('result'):
             os.mkdir('result')
-        if t % 100 == 0 and t != 0:
+        if (t + 1) % 100 == 0:
             print('[Log] Results saved.')
             spio.savemat('result/result_%d.mat' % self.taskID, {'prediction': self.prediction, 'mseLoss': self.mseLoss, 'iter': t})
