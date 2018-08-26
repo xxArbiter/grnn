@@ -10,11 +10,7 @@ import numpy as np
 
 from dataset import trafficDataLoader
 from model import GRNN
-
-
-def getTime(begin, end):
-    timeDelta = end - begin
-    return '%d h %d m %d.%ds' % (timeDelta.seconds // 3600, (timeDelta.seconds%3600) // 60, timeDelta.seconds % 60, timeDelta.microseconds)
+from utils import *
 
 timStart = datetime.datetime.now()
 
@@ -25,6 +21,7 @@ parser.add_argument('--dimHidden', type=int, default=32, help='GRNN hidden state
 parser.add_argument('--truncate', type=int, default=144, help='BPTT length for GRNN')
 parser.add_argument('--nIter', type=int, default=2, help='number of epochs to train')
 parser.add_argument('--lr', type=float, default=0.01, help='learning rate')
+parser.add_argument('--showNum', type=int, default=0, help='prediction plot. None: no plot')
 parser.add_argument('--cuda', action='store_true', help='enables cuda')
 parser.add_argument('--verbal', action='store_true', help='print training info or not')
 parser.add_argument('--manualSeed', type=int, help='manual seed')
@@ -46,8 +43,8 @@ def main(opt):
 
     data = np.transpose(dataLoader.data)        # [T, n]
     A = dataLoader.A
-    opt.nNode = dataLoader.nNode
     A = A + np.eye(opt.nNode)
+    opt.nNode = dataLoader.nNode
     opt.dimFeature = 1
 
     #--------TEST---------
@@ -60,7 +57,9 @@ def main(opt):
 
     data = torch.from_numpy(data[np.newaxis, :, :, np.newaxis]) # [b, T, n, d]
     A = torch.from_numpy(A[np.newaxis, :, :])                   # [b, n, n]
+    opt.interval = data.size(1)
 
+    log = Log(opt)
     net = GRNN(opt)
     net.double()
     print(net)
@@ -75,46 +74,53 @@ def main(opt):
 
     optimizer = optim.Adam(net.parameters(), lr=opt.lr)
 
-    plt.figure(1, figsize=(12, 5))
-    plt.ion
+    if opt.showNum != None:
+        plt.figure(1, figsize=(12, 5))
+        plt.ion
 
     hState = torch.randn(opt.batchSize, opt.dimHidden, opt.nNode).double()
     yLastPred = 0
     
-    for t in range(data.size(1) - opt.truncate):
+    for t in range(opt.interval - opt.truncate):
         x = data[:, t:(t + opt.truncate), :, :]
         y = data[:, (t + 1):(t + opt.truncate + 1), :, :]
 
+        timStamp = datetime.datetime.now()
         for i in range(opt.nIter):
-            process = '[Log] %d propogation, %d epoch. ' % (t + 1, i + 1)
-            timStamp = datetime.datetime.now()
-            prediction, hNew = net(x, hState, A)
-            print(process + 'Forward used: %s.' % getTime(timStamp, datetime.datetime.now()))
+            O, hNew = net(x, hState, A)
             hState = hState.data
-
-            loss = criterion(prediction, y)
+            
+            loss = criterion(O, y)
             optimizer.zero_grad()
-            timStamp = datetime.datetime.now()
             loss.backward()
-            print(process + 'Backward used: %s.' % getTime(timStamp, datetime.datetime.now()))
             optimizer.step()
+
+            # save prediction result
+            if i == 0:
+                log.prediction[:, t, :, :] = O.data
+                log.mseLoss[t] = loss.data
         
+        log.showIterState(t, timStamp)
+
         _, hState = net.propogator(x[:, 0, :, :], hState, A)
         hState = hState.data
 
-        if t == 0:
-            plt.plot([v for v in range(opt.truncate)], x[:, :, 0, :].data.numpy().flatten(), 'r-')
-            plt.plot([v + 1 for v in range(opt.truncate)], prediction[:, :, 0, :].data.numpy().flatten(), 'b-')
-        else:
-            plt.plot([t + opt.truncate - 2, t + opt.truncate - 1], x[:, -2:, 0, :].data.numpy().flatten(), 'r-')
-            plt.plot([t + opt.truncate - 1, t + opt.truncate], [yLastPred, prediction[0, -1, 0, 0]], 'b-')
-        plt.draw()
-        plt.pause(0.5)
-        yLastPred = prediction[0, -1, 0, 0]
+        if opt.showNum != None:
+            if t == 0:
+                plt.plot([v for v in range(opt.truncate)], x[:, :, opt.showNum, :].data.numpy().flatten(), 'r-')
+                plt.plot([v + 1 for v in range(opt.truncate)], O[:, :, opt.showNum, :].data.numpy().flatten(), 'b-')
+            else:
+                plt.plot([t + opt.truncate - 2, t + opt.truncate - 1], x[:, -2:, opt.showNum, :].data.numpy().flatten(), 'r-')
+                plt.plot([t + opt.truncate - 1, t + opt.truncate], [yLastPred, O[0, -1, opt.showNum, 0]], 'b-')
+            plt.draw()
+            plt.pause(0.5)
+            yLastPred = O[0, -1, opt.showNum, 0]
 
-    plt.ioff()
-    plt.show()
+    if opt.showNum != None:
+        plt.ioff()
+        plt.show()
 
+    log.saveResult()
 
 if __name__ == "__main__":
     main(opt)

@@ -13,9 +13,9 @@ class AttrProxy(object):
         return getattr(self.module, self.prefix + str(i))
 
 
-class gruCell(nn.Module):
+class GruCell(nn.Module):
     def __init__(self, opt):
-        super(gruCell, self).__init__()
+        super(GruCell, self).__init__()
         self.dimFeature = opt.dimFeature    # d
         self.dimHidden = opt.dimHidden      # D
         
