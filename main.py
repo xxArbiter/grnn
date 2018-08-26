@@ -97,7 +97,7 @@ def main(opt):
 
             # save prediction result
             if i == 0:
-                log.prediction[:, t, :, :] = O.data
+                log.prediction[:, t, :, :] = O[:, -1, :, :].data
                 log.mseLoss[t] = loss.data
         
         log.showIterState(t, timStamp)
