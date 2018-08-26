@@ -41,11 +41,11 @@ if opt.cuda:
 def main(opt):
     dataLoader = trafficDataLoader(opt.taskID)
 
+    opt.nNode = dataLoader.nNode
+    opt.dimFeature = 1
     data = np.transpose(dataLoader.data)        # [T, n]
     A = dataLoader.A
     A = A + np.eye(opt.nNode)
-    opt.nNode = dataLoader.nNode
-    opt.dimFeature = 1
 
     #--------TEST---------
     #data = data[:, 0]
@@ -87,7 +87,7 @@ def main(opt):
 
         timStamp = datetime.datetime.now()
         for i in range(opt.nIter):
-            O, hNew = net(x, hState, A)
+            O, _ = net(x, hState, A)
             hState = hState.data
             
             loss = criterion(O, y)
