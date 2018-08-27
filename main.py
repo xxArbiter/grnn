@@ -21,7 +21,7 @@ parser.add_argument('--dimHidden', type=int, default=32, help='GRNN hidden state
 parser.add_argument('--truncate', type=int, default=144, help='BPTT length for GRNN')
 parser.add_argument('--nIter', type=int, default=2, help='number of epochs to train')
 parser.add_argument('--lr', type=float, default=0.01, help='learning rate')
-parser.add_argument('--showNum', type=int, default=0, help='prediction plot. None: no plot')
+parser.add_argument('--showNum', type=int, default=None, help='prediction plot. None: no plot')
 parser.add_argument('--cuda', action='store_true', help='enables cuda')
 parser.add_argument('--verbal', action='store_true', help='print training info or not')
 parser.add_argument('--manualSeed', type=int, help='manual seed')
@@ -59,7 +59,7 @@ def main(opt):
     A = torch.from_numpy(A[np.newaxis, :, :])                   # [b, n, n]
     opt.interval = data.size(1)
 
-    log = Log(opt)
+    log = Log(opt, timStart)
     net = GRNN(opt)
     net.double()
     print(net)
@@ -85,7 +85,6 @@ def main(opt):
         x = data[:, t:(t + opt.truncate), :, :]
         y = data[:, (t + 1):(t + opt.truncate + 1), :, :]
 
-        timStamp = datetime.datetime.now()
         for i in range(opt.nIter):
             O, _ = net(x, hState, A)
             hState = hState.data
@@ -101,7 +100,7 @@ def main(opt):
                 log.prediction[:, t, :, :] = O[:, -1, :, :].data
                 log.mseLoss[t] = MSE.data
         
-        log.showIterState(t, timStamp)
+        log.showIterState(t)
 
         _, hState = net.propogator(x[:, 0, :, :], hState, A)
         hState = hState.data
