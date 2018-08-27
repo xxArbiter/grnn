@@ -18,7 +18,7 @@ def ms2f(ms):
 class Log(object):
     def __init__(self, opt, startTime):
         self.taskID = opt.taskID
-        self.resLength = opt.interval
+        self.resLength = opt.interval - opt.truncate
         self.verbal = opt.verbal
         self.startTime = startTime
 
