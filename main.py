@@ -91,6 +91,7 @@ def main(opt):
             hState = hState.data
             
             loss = criterion(O, y)
+            MSE = criterion(O[:, -1, :, :], y[:, -1, :, :])
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
@@ -98,7 +99,7 @@ def main(opt):
             # save prediction result
             if i == 0:
                 log.prediction[:, t, :, :] = O[:, -1, :, :].data
-                log.mseLoss[t] = loss.data
+                log.mseLoss[t] = MSE.data
         
         log.showIterState(t, timStamp)
 
