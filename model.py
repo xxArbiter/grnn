@@ -102,7 +102,7 @@ class GRNN(nn.Module):
         self.dimFeature = opt.dimFeature    # d
         self.dimHidden = opt.dimHidden      # D
         self.interval = opt.truncate        # T
-        self.cuda = opt.cuda
+        self.useCuda = opt.cuda
 
         self.propogator = Propogator(opt)
 
@@ -113,7 +113,7 @@ class GRNN(nn.Module):
         A: transfer matrix [batchSize, nNode, nNode]
         """
         O = torch.zeros(self.batchSize, self.interval, self.nNode, self.dimFeature).double()
-        if self.cuda:
+        if self.useCuda:
             O = O.cuda()
 
         for t in range(self.interval):
