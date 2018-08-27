@@ -55,31 +55,30 @@ def main(opt):
     #opt.nNode = 1
     #------TEST END-------
 
-    data = torch.from_numpy(data[np.newaxis, :, :, np.newaxis]) # [b, T, n, d]
-    A = torch.from_numpy(A[np.newaxis, :, :])                   # [b, n, n]
+    data = torch.from_numpy(data[np.newaxis, :, :, np.newaxis])             # [b, T, n, d]
+    A = torch.from_numpy(A[np.newaxis, :, :])                               # [b, n, n]
+    hState = torch.randn(opt.batchSize, opt.dimHidden, opt.nNode).double()  # [b, D, n]
     opt.interval = data.size(1)
+    yLastPred = 0
 
     log = Log(opt, timStart)
     net = GRNN(opt)
+    criterion = nn.MSELoss()
+    optimizer = optim.Adam(net.parameters(), lr=opt.lr)
+    
     net.double()
     print(net)
-
-    criterion = nn.MSELoss()
 
     if opt.cuda:
         net.cuda()
         criterion.cuda()
         data = data.cuda()
         A = A.cuda()
-
-    optimizer = optim.Adam(net.parameters(), lr=opt.lr)
+        hState = hState.cuda()
 
     if opt.showNum != None:
         plt.figure(1, figsize=(12, 5))
         plt.ion
-
-    hState = torch.randn(opt.batchSize, opt.dimHidden, opt.nNode).double()
-    yLastPred = 0
     
     for t in range(opt.interval - opt.truncate):
         x = data[:, t:(t + opt.truncate), :, :]
