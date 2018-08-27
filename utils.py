@@ -35,20 +35,14 @@ class Log(object):
     def saveResult(self, t):
         if not os.path.exists('result'):
             os.mkdir('result')
-        if (t + 1) % 100 == 0 and self.verbal:
-            print('[Log] Results saved.')
+        if (t + 1) % 100 == 0 or t == self.resLength - 1 and self.verbal:
+            if t == self.resLength - 1:
+                print('[Log] Train finished. All results saved! Total used: %s.' % getTime(self.startTime))
+            else:
+                print('[Log] Results saved.')
             duration = datetime.datetime.now() - self.startTime
             spio.savemat('result/result_%d.mat' % self.taskID, {
-                    'prediction': self.prediction,
-                    'mseLoss': self.mseLoss,
+                    'prediction': self.prediction.data.numpy(),
+                    'mseLoss': self.mseLoss.data.numpy(),
                     'iter': t + 1,
-                    'totalTime': duration.seconds + ms2f(duration.microseconds)})
-        
-        if t == self.resLength - 1:
-            print('[Log] Train finished. All results saved! Total used: %s.' % getTime(self.startTime))
-            duration = datetime.datetime.now() - self.startTime
-            spio.savemat('result/result_%d.mat' % self.taskID, {
-                    'prediction': self.prediction,
-                    'mseLoss': self.mseLoss,
-                    'iter': self.resLength,
                     'totalTime': duration.seconds + ms2f(duration.microseconds)})
