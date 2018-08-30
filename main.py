@@ -106,11 +106,19 @@ def main(opt):
 
         if opt.showNum != None:
             if t == 0:
-                plt.plot([v for v in range(opt.truncate)], x[:, :, opt.showNum, :].data.numpy().flatten(), 'r-')
-                plt.plot([v + 1 for v in range(opt.truncate)], O[:, :, opt.showNum, :].data.numpy().flatten(), 'b-')
+                if opt.cuda:
+                    plt.plot([v for v in range(opt.truncate)], x[:, :, opt.showNum, :].cpu().data.numpy().flatten(), 'r-')
+                    plt.plot([v + 1 for v in range(opt.truncate)], O[:, :, opt.showNum, :].cpu().data.numpy().flatten(), 'b-')
+                else:
+                    plt.plot([v for v in range(opt.truncate)], x[:, :, opt.showNum, :].data.numpy().flatten(), 'r-')
+                    plt.plot([v + 1 for v in range(opt.truncate)], O[:, :, opt.showNum, :].data.numpy().flatten(), 'b-')
             else:
-                plt.plot([t + opt.truncate - 2, t + opt.truncate - 1], x[:, -2:, opt.showNum, :].data.numpy().flatten(), 'r-')
-                plt.plot([t + opt.truncate - 1, t + opt.truncate], [yLastPred, O[0, -1, opt.showNum, 0]], 'b-')
+                if opt.cuda:
+                    plt.plot([t + opt.truncate - 2, t + opt.truncate - 1], x[:, -2:, opt.showNum, :].cpu().data.numpy().flatten(), 'r-')
+                    plt.plot([t + opt.truncate - 1, t + opt.truncate], [yLastPred, O[0, -1, opt.showNum, 0]], 'b-')
+                else:
+                    plt.plot([t + opt.truncate - 2, t + opt.truncate - 1], x[:, -2:, opt.showNum, :].data.numpy().flatten(), 'r-')
+                    plt.plot([t + opt.truncate - 1, t + opt.truncate], [yLastPred, O[0, -1, opt.showNum, 0]], 'b-')
             plt.draw()
             plt.pause(0.5)
             yLastPred = O[0, -1, opt.showNum, 0]
