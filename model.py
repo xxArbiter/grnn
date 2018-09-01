@@ -71,7 +71,10 @@ class Propogator(nn.Module):
             nn.Linear(self.dimHidden + self.dimFeature, self.dimHidden),
             nn.Tanh()
         )
-        self.output = nn.Linear(self.dimHidden, self.dimFeature)
+        self.output = nn.Sequential(
+            nn.Linear(self.dimHidden, self.dimFeature),
+            nn.Sigmoid()
+        )
 
     def forward(self, x, hState, A):
         """
