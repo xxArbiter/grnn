@@ -27,7 +27,7 @@ class trafficDataLoader():
     def seriesLoader(self, taskID):
         data = spio.loadmat('data/data_%d.mat' % taskID)
         data = data['data']
-        self.dimFeature = data.shape(2)
+        self.dimFeature = data.shape[2]
         return data
 
     def formAdjMatrix(self, graph):
