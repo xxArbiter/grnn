@@ -44,7 +44,6 @@ def main(opt):
     opt.nNode = dataLoader.nNode
     opt.dimFeature = 1
     data = np.transpose(dataLoader.data)        # [T, n]
-    data /= 100
     A = dataLoader.A
     A = A + np.eye(opt.nNode)
 
