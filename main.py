@@ -43,8 +43,8 @@ def main(opt):
     dataLoader = trafficDataLoader(opt.taskID)
 
     opt.nNode = dataLoader.nNode
-    opt.dimFeature = 1
-    data = np.transpose(dataLoader.data)        # [T, n]
+    opt.dimFeature = dataLoader.dimFeature
+    data = dataLoader.data        # [b, T, n, d]
     data /= 100
     A = dataLoader.A
     A = opt.alpha * A + np.eye(opt.nNode)
@@ -57,7 +57,7 @@ def main(opt):
     #opt.nNode = 1
     #------TEST END-------
 
-    data = torch.from_numpy(data[np.newaxis, :, :, np.newaxis])             # [b, T, n, d]
+    data = torch.from_numpy(data)                                           # [b, T, n, d]
     A = torch.from_numpy(A[np.newaxis, :, :])                               # [b, n, n]
     hState = torch.randn(opt.batchSize, opt.dimHidden, opt.nNode).double()  # [b, D, n]
     opt.interval = data.size(1)
