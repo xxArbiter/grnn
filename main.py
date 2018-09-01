@@ -10,7 +10,7 @@ import numpy as np
 
 from dataset import trafficDataLoader
 from model import GRNN
-from utils import *
+from utils import Log
 
 timStart = datetime.datetime.now()
 
