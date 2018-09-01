@@ -20,7 +20,7 @@ class trafficDataLoader():
                 outEdge = outEdge[1:]
                 for i in range(len(outEdge)):
                     outEdge[i] = int(outEdge[i])
-            graph.append(outEdge)
+                graph.append(outEdge)
 
         return graph
 
