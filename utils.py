@@ -42,15 +42,13 @@ class Log(object):
             duration = datetime.datetime.now() - self.startTime
             timeStamp = '%d%02d%02d_%02d%02d' % (self.startTime.year, self.startTime.month, self.startTime.day,
                     self.startTime.hour, self.startTime.minute)
-            spio.savemat('result/result_%d_%s.mat' % (self.opt.taskID, timeStamp), {
-                    'prediction': self.prediction.data.numpy(),
-                    'mseLoss': self.mseLoss.data.numpy(),
-                    'iter': t + 1,
-                    'totalTime': duration.seconds + ms2f(duration.microseconds),
-                    'batchSize': self.opt.batchSize,
-                    'dimHidden': self.opt.dimHidden,
-                    'truncate': self.opt.truncate,
-                    'nIter': self.opt.nIter,
-                    'lr': self.opt.lr,
-                    'cuda': self.opt.cuda,
-                    'manualSeed': self.opt.manualSeed})
+            spio.savemat('result/result_%d-%.2fa-%dT-%dD-%di-%.4flr.mat' % (self.opt.taskID, self.opt.alpha, self.opt.truncate,
+                    self.opt.dimHidden, self.opt.nIter, self.opt.lr), {
+                        'prediction': self.prediction.data.numpy(),
+                        'mseLoss': self.mseLoss.data.numpy(),
+                        'iter': t + 1,
+                        'startTime': timeStamp,
+                        'totalTime': duration.seconds + ms2f(duration.microseconds),
+                        'batchSize': self.opt.batchSize,
+                        'cuda': self.opt.cuda,
+                        'manualSeed': self.opt.manualSeed})
