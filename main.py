@@ -87,7 +87,7 @@ def main(opt):
         y = data[:, (t + 1):(t + opt.truncate + 1), :, :]
 
         for i in range(opt.nIter):
-            O, _ = net(x, hState, A)
+            O, hState = net(x, hState, A)
             hState = hState.data
             
             loss = criterion(O, y)
@@ -103,8 +103,8 @@ def main(opt):
         
         log.showIterState(t)
 
-        _, hState = net.propogator(x[:, 0, :, :], hState, A)
-        hState = hState.data
+        # _, hState = net.propogator(x[:, 0, :, :], hState, A)
+        # hState = hState.data
 
         if opt.showNum != None:
             if t == 0:
