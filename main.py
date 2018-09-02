@@ -16,7 +16,7 @@ timStart = datetime.datetime.now()
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--taskID', type=int, default=1, help='traffic prediction task id')
-parser.add_argument('--alpha', type=int, default=0.1, help='traffic prediction task id')
+parser.add_argument('--alpha', type=float, default=0.1, help='traffic prediction task id')
 parser.add_argument('--batchSize', type=int, default=1, help='input batch size')
 parser.add_argument('--dimHidden', type=int, default=32, help='GRNN hidden state size')
 parser.add_argument('--truncate', type=int, default=144, help='BPTT length for GRNN')
