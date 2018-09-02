@@ -26,7 +26,7 @@ parser.add_argument('--showNum', type=int, default=None, help='prediction plot. 
 parser.add_argument('--cuda', action='store_true', help='enables cuda')
 parser.add_argument('--verbal', action='store_true', help='print training info or not')
 parser.add_argument('--manualSeed', type=int, help='manual seed')
-parser.add_argument('--test', action='sotre_true', help='for one-node prediction testing')
+parser.add_argument('--test', action='store_true', help='for one-node prediction testing')
 
 opt = parser.parse_args()
 print(opt)

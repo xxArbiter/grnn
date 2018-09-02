@@ -16,10 +16,10 @@ X = []
 Y = []
 for t in range(data.shape[1] - 144):    # T - truncate
     X.append(data[:, t:t+144])          # annotation[n, 144]
-    Y.append(data[:, t+144])            # target[n, 1]
+    Y.append(data[:, t+144])            # target[n]
 
 trainX = np.array(X[:-720])             # [train, n, 144]
-trainY = np.array(Y[:-720])            # [train, n, 1]
+trainY = np.array(Y[:-720])            # [train, n]
 testX = np.array(X[-720:])             # [test, n, 144]
 
 start = time.clock()
@@ -27,11 +27,12 @@ prediction = np.zeros((data.shape[0], 720))
 y = data[:, -720:]
 for n in range(data.shape[0]):
     svr = svm.SVR()
-    svr.fit(trainX[:, n, :], np.reshape(trainY[:, n, 0], trainY.shape[0]))
-    prediction[n, :] = svr.predict(testX)
-    print('Finish %d nodes, MSE: used: %.1fs' % (n+1, mean_squared_error(y[n, :], prediction[n, :]), time.clock() - start))
+    tmpY = np.reshape(trainY[:, n], trainY.shape[0])
+    svr.fit(trainX[:, n, :], np.reshape(trainY[:, n], trainY.shape[0]))
+    prediction[n, :] = svr.predict(testX[:, n, :])
+    print('Finish %d nodes, MSE: %.4f, used: %.1fs' % (n+1, mean_squared_error(y[n, :], prediction[n, :]), time.clock() - start))
 
 error = y - prediction
 MSE = (error**2).mean()
 VD = ((error - error.mean())**2).mean()
-print('MSE: %.4f, VD: %.4f, used: %.1fs' % (MSE, VD, time.clock() - start))
+print('MSE: %.4f, VD: %.4f, used: %.1fs' % (MSE*10000, VD*10000, time.clock() - start))
