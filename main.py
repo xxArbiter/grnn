@@ -26,6 +26,7 @@ parser.add_argument('--showNum', type=int, default=None, help='prediction plot. 
 parser.add_argument('--cuda', action='store_true', help='enables cuda')
 parser.add_argument('--verbal', action='store_true', help='print training info or not')
 parser.add_argument('--manualSeed', type=int, help='manual seed')
+parser.add_argument('--test', action='sotre_true', help='for one-node prediction testing')
 
 opt = parser.parse_args()
 print(opt)
@@ -44,18 +45,15 @@ def main(opt):
 
     opt.nNode = dataLoader.nNode
     opt.dimFeature = dataLoader.dimFeature
-    data = dataLoader.data        # [b, T, n, d]
+    data = dataLoader.data          # [b, T, n, d]
     data /= 100
     A = dataLoader.A
     A = opt.alpha * A + np.eye(opt.nNode)
 
-    #--------TEST---------
-    #data = data[:, 0]
-    #data = data[:, np.newaxis]
-    #A = np.array([1.])
-    #A = A[:, np.newaxis]
-    #opt.nNode = 1
-    #------TEST END-------
+    if opt.test:
+        data = data[:, :, 0, :]
+        A = np.array([[1.]])
+        opt.nNode = 1
 
     data = torch.from_numpy(data)                                           # [b, T, n, d]
     A = torch.from_numpy(A[np.newaxis, :, :])                               # [b, n, n]
