@@ -34,4 +34,5 @@ for n in range(data.shape[0]):
 error = y - prediction
 MSE = (error**2).mean()
 VD = ((error - error.mean())**2).mean()
+spio.savemat('result/result_%d-GBDT.mat' % taskID)
 print('MSE: %.4f, VD: %.4f, used: %.1fs' % (MSE*10000, VD*10000, time.clock() - start))
